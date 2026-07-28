@@ -38,7 +38,31 @@
 
     <!-- Server info -->
     <section class="card">
-      <h2>معلومات السيرفر الخاص بك</h2>
+      <h2>🧠 القاعدة الذهبية (افهم هذا أولاً)</h2>
+      <div class="role-box">
+        <div class="role-item">
+          <div class="role-icon">🖥️</div>
+          <div>
+            <strong>السيرفر</strong> = جهاز Linux (VPS، Raspberry Pi، PC).
+            <br>
+            <span class="muted-text">يشغل quick-start.sh ويفضل شغال 24/7. هذا الجهاز اللي يربط الإنترنت.</span>
+          </div>
+        </div>
+        <div class="role-item">
+          <div class="role-icon">📱</div>
+          <div>
+            <strong>العميل</strong> = هاتفك (عبر Termux) أو PC آخر.
+            <br>
+            <span class="muted-text">يتصل بالسيرفر. ترافيكه يمر عبر السيرفر ويصبح مشفّر.</span>
+          </div>
+        </div>
+      </div>
+      <p class="muted">⚠️ لا تشغل السيرفر على Termux — بطيء ومحدود. السيرفر يفضل على Linux حقيقي.</p>
+    </section>
+
+    <!-- Server info -->
+    <section class="card">
+      <h2>معلومات سيرفرك (لتضعها في العميل)</h2>
       <table class="kv-table">
         <tr><td>عنوان السيرفر</td><td><code>{{ server_ip }}</code></td></tr>
         <tr><td>منفذ النفق (UDP)</td><td><code>{{ tunnel_port }}</code></td></tr>
@@ -50,63 +74,46 @@
 
     <!-- Step 1: Client choice -->
     <section class="card">
-      <h2>الخطوة 1: اختر تطبيق VPN على الهاتف</h2>
-      <p>VortexVPN يستعمل بروتوكول مخصص (UDP + AES-256-GCM). حالياً، الطريقة الأسهل للهاتف هي:</p>
-      <table class="client-table">
-        <thead>
-          <tr><th>التطبيق</th><th>المنصّة</th><th>ملاحظة</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>OpenVPN Connect</strong></td>
-            <td>Android / iOS</td>
-            <td>متوفر في Play Store و App Store مجاناً. (يتطلب إعداد ملف .ovpn — لم يُولّد بعد)</td>
-          </tr>
-          <tr>
-            <td><strong>WireGuard</strong></td>
-            <td>Android / iOS</td>
-            <td>أسرع وأبسط. (يتطلب دعم بروتوكول WireGuard — في قائمة المهام)</td>
-          </tr>
-          <tr>
-            <td><strong>عميل Python</strong></td>
-            <td>Linux / Termux</td>
-            <td><code>python -m vortexvpn.core.tunnel_client --host SERVER_IP --port 4433 --user YOUR_USER --password YOUR_PW</code></td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="muted">⚠️ حالياً، العميل الأكثر اختباراً هو عميل Python. تطبيقات OpenVPN/WireGuard تحتاج توليد ملف تعريف — هذه ميزة قادمة.</p>
+      <h2>الخطوة 1: على الهاتف الآخر، ثبّت Termux</h2>
+      <p>Termux هو تطبيق يعطي هاتفك بيئة Linux حقيقية. نزّله من <strong>F-Droid فقط</strong> (نسخة Play Store قديمة ومكسورة):</p>
+      <pre>https://f-droid.org/packages/com.termux/</pre>
+      <p>افتح Termux وثبّت Python:</p>
+      <pre>pkg update -y
+pkg install -y python git</pre>
     </section>
 
-    <!-- Step 2: Connect -->
+    <!-- Step 2: Clone + minimal deps -->
     <section class="card">
-      <h2>الخطوة 2: الاتصال (الطريقة الأسهل حالياً)</h2>
-      <ol class="step-list">
-        <li>
-          <strong>على الهاتف الآخر، ثبّت Termux</strong> (من F-Droid، النسخة في Play Store قديمة):<br>
-          <code>https://f-droid.org/packages/com.termux/</code>
-        </li>
-        <li>
-          <strong>في Termux، ثبّت Python:</strong>
-          <pre>pkg install python python-dev git</pre>
-        </li>
-        <li>
-          <strong>انسخ المشروع:</strong>
-          <pre>git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
+      <h2>الخطوة 2: انسخ المشروع وثبّت deps العميل فقط</h2>
+      <pre>git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
 cd MFF-Minbot-free-fire
-pip install -r requirements.txt</pre>
-        </li>
-        <li>
-          <strong>أنشئ مستخدم على السيرفر</strong> (من لوحة الويب في المتصفح → المستخدمون → إضافة)، ثم على الهاتف:
-          <pre>python -m vortexvpn.core.tunnel_client \
-  --host {{ server_ip }} \
-  --port {{ tunnel_port }} \
-  --user USERNAME \
-  --password PASSWORD</pre>
-        </li>
-        <li>
-          <strong>عندما ترى "handshake completed"</strong> — الهاتف متصل بالـ VPN.
-        </li>
+./scripts/client-start.sh {{ server_ip }} {{ tunnel_port }} USERNAME PASSWORD</pre>
+      <p class="muted">↳ هذا السكريبت يثبّت فقط pycryptodome (لا Flask، لا gunicorn، لا cryptography) — خفيف ويعمل على Android.</p>
+    </section>
+
+    <!-- Step 3: Create user -->
+    <section class="card">
+      <h2>الخطوة 3: أنشئ مستخدم في لوحة الويب</h2>
+      <p>قبل تشغيل العميل، لازم تنشئ مستخدم على السيرفر:</p>
+      <ol class="step-list">
+        <li>في المتصفح على الـ PC: افتح <code>http://{{ server_ip }}:{{ web_port }}</code></li>
+        <li>سجّل دخول بـ admin (من <code>./scripts/quick-start.sh</code>)</li>
+        <li>اذهب إلى <strong>المستخدمون</strong> → إضافة</li>
+        <li>أنشئ مستخدم، مثلاً <code>phone1</code> بكلمة سر قوية</li>
+        <li>استعمل هذه البيانات في client-start.sh</li>
       </ol>
+    </section>
+
+    <!-- Step 4: Connect -->
+    <section class="card">
+      <h2>الخطوة 4: اتصال (مثال كامل)</h2>
+      <p>على الهاتف (في Termux):</p>
+      <pre>cd ~/MFF-Minbot-free-fire
+./scripts/client-start.sh {{ server_ip }} {{ tunnel_port }} phone1 MyStrongPass123</pre>
+      <p>إذا نجح الاتصال، تظهر رسالة:</p>
+      <pre>[client] sent handshake init to ('{{ server_ip }}', {{ tunnel_port }})
+[client] handshake completed</pre>
+      <p class="muted">↳ بمجرد رؤية "handshake completed" — الهاتف متصل بالـ VPN.</p>
     </section>
 
     <!-- What happens after -->

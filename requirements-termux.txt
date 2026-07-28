@@ -1,0 +1,25 @@
+# Termux (Android) requirements
+# ------------------------------
+# The `cryptography` package cannot be built on aarch64 Android because
+# Rust is not in the Termux default toolchain. We use `pycryptodome`
+# instead, which ships prebuilt wheels for Android.
+
+# Crypto backend (works on Termux)
+pycryptodome>=3.20
+
+# Web panel
+flask>=3.0,<4.0
+werkzeug>=3.0,<4.0
+
+# Password hashing (argon2-cffi has wheels for Android)
+argon2-cffi>=23.1
+
+# Optional YAML config (we use TOML by default)
+pyyaml>=6.0
+
+# Test / dev
+pytest>=8.0
+pytest-asyncio>=0.23
+
+# Production WSGI server (gunicorn works on Termux too)
+gunicorn>=22.0

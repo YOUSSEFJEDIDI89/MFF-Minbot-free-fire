@@ -236,3 +236,17 @@ a:hover { color: var(--accent-2); }
 .cta-card { text-align: center; background: linear-gradient(135deg, var(--bg-elev), var(--bg-elev-2)); }
 .cta-card .btn-primary { display: inline-block; padding: 12px 28px; width: auto; margin-top: 10px; }
 .cta-btn { text-decoration: none; color: #06151a; font-weight: 600; }
+
+/* Role explanation boxes */
+.role-box { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+.role-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px; background: var(--bg); border-radius: 8px;
+  border-right: 3px solid var(--accent);
+}
+.role-icon { font-size: 28px; flex-shrink: 0; }
+.muted-text { color: var(--muted); font-size: 12px; display: block; margin-top: 4px; }
+
+@media (max-width: 720px) {
+  .role-box { grid-template-columns: 1fr; }
+}

@@ -78,6 +78,23 @@ case "$ACTION" in
 esac
 
 # --------------------------------------------------------------------------- #
+# Detect Termux / Android (no prebuilt cryptography wheels here)
+# --------------------------------------------------------------------------- #
+detect_termux() {
+  if [ -n "$PREFIX" ] && case "$PREFIX" in *com.termux*) true;; *) false;; esac; then
+    return 0
+  fi
+  if [ -d "/data/data/com.termux" ]; then return 0; fi
+  if command -v termux-info >/dev/null 2>&1; then return 0; fi
+  return 1
+}
+
+IS_TERMUX=0
+if detect_termux; then
+  IS_TERMUX=1
+fi
+
+# --------------------------------------------------------------------------- #
 # Pretty printer
 # --------------------------------------------------------------------------- #
 C_GREEN="\033[32m"; C_CYAN="\033[36m"; C_YELLOW="\033[33m"; C_RED="\033[31m"
@@ -86,6 +103,14 @@ step() { echo -e "${C_CYAN}[$1]${C_RESET} $2"; }
 ok()   { echo -e "${C_GREEN}[OK]${C_RESET} $1"; }
 warn() { echo -e "${C_YELLOW}[!]${C_RESET} $1"; }
 err()  { echo -e "${C_RED}[X]${C_RESET} $1" >&2; }
+
+if [ "$IS_TERMUX" = "1" ]; then
+  warn "Termux / Android detected"
+  warn "  → using pycryptodome instead of cryptography (no Rust needed)"
+  warn "  → C++ accelerator will be skipped"
+  warn "  → this device is best used as the CLIENT, not the SERVER"
+  echo ""
+fi
 
 # --------------------------------------------------------------------------- #
 # Step 1: venv
@@ -100,17 +125,26 @@ fi
 # --------------------------------------------------------------------------- #
 step "2/7" "checking Python dependencies..."
 "$PYTHON" -m pip install --quiet --upgrade pip wheel setuptools
-"$PYTHON" -m pip install --quiet -r "$PROJECT_DIR/requirements.txt" 2>&1 | tail -1 || {
+if [ "$IS_TERMUX" = "1" ]; then
+  REQ_FILE="$PROJECT_DIR/requirements-termux.txt"
+else
+  REQ_FILE="$PROJECT_DIR/requirements.txt"
+fi
+"$PYTHON" -m pip install --quiet -r "$REQ_FILE" 2>&1 | tail -1 || {
   err "failed to install Python deps"
+  err "  tried: $REQ_FILE"
+  err "  on Termux? Make sure: pkg install python python-dev rust binutils"
   exit 1
 }
-ok "dependencies ready"
+ok "dependencies ready ($([ "$IS_TERMUX" = "1" ] && echo termux || echo standard))"
 
 # --------------------------------------------------------------------------- #
-# Step 3: C++ accelerator (optional)
+# Step 3: C++ accelerator (optional — skipped on Termux)
 # --------------------------------------------------------------------------- #
 step "3/7" "checking C++ accelerator..."
-if "$PYTHON" -c "import vortex_accel" 2>/dev/null; then
+if [ "$IS_TERMUX" = "1" ]; then
+  warn "skipping C++ accelerator on Termux (pycryptodome is fast enough)"
+elif "$PYTHON" -c "import vortex_accel" 2>/dev/null; then
   ok "accelerator already built"
 elif command -v g++ >/dev/null 2>&1 && "$PYTHON" -c "import pybind11" 2>/dev/null; then
   ( cd "$PROJECT_DIR/cpp_module" && make >/dev/null 2>&1 && make install >/dev/null 2>&1 ) && \
