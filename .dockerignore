@@ -1,0 +1,17 @@
+# .dockerignore - keep build context lean
+.git
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.so
+venv/
+.venv/
+.env
+*.log
+*.pid
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+node_modules/

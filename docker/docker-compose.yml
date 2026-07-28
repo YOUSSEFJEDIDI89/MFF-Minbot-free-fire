@@ -1,0 +1,50 @@
+# docker-compose.yml for VortexVPN.
+# Brings up: web panel (8080), tunnel (4433/udp), monitor (9101/tcp).
+#
+# Usage:
+#   docker compose up -d --build
+#   docker compose logs -f
+#   docker compose down
+
+services:
+  vortexvpn:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: vortexvpn
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # web panel
+      - "4433:4433/udp"  # tunnel
+      - "9101:9101"   # monitor (bind to 127.0.0.1 in prod)
+    volumes:
+      - ../configs/config.toml:/etc/vortexvpn/config.toml:ro
+      - vortex-logs:/var/log/vortexvpn
+      - vortex-data:/var/run/vortexvpn
+    environment:
+      VORTEX_WEB_SECRET: ${VORTEX_WEB_SECRET:-dev-only-secret-change-me}
+      VORTEX_DB_URL: sqlite:////var/run/vortexvpn/vortexvpn.db
+      VORTEX_LOG_LEVEL: ${VORTEX_LOG_LEVEL:-INFO}
+    cap_add:
+      - NET_ADMIN    # needed for TUN device creation
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    networks:
+      - vortex
+
+  # Optional: reverse-proxy with TLS termination
+  # caddy:
+  #   image: caddy:2-alpine
+  #   ports: ["443:443", "80:80"]
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  #   depends_on: [vortexvpn]
+  #   networks: [vortex]
+
+volumes:
+  vortex-logs:
+  vortex-data:
+
+networks:
+  vortex:
+    driver: bridge

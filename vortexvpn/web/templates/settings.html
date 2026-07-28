@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VortexVPN · الإعدادات</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">⚡ VortexVPN</div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+      <a href="{{ url_for('users_page') }}">المستخدمون</a>
+      <a href="{{ url_for('settings_page') }}">الإعدادات</a>
+      <span class="sep">|</span>
+      <span class="user">{{ user.username }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">خروج</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>إعدادات النفق</h2>
+      <table class="kv-table">
+        <tr><td>عنوان الاستماع</td><td><code>{{ cfg.tunnel.listen_host }}:{{ cfg.tunnel.listen_port }}</code></td></tr>
+        <tr><td>MTU</td><td>{{ cfg.tunnel.mtu }}</td></tr>
+        <tr><td>التشفير</td><td><code>{{ cfg.tunnel.cipher }}</code></td></tr>
+        <tr><td>KDF</td><td><code>{{ cfg.tunnel.kdf }}</code></td></tr>
+        <tr><td>العملاء الأقصى</td><td>{{ cfg.tunnel.max_clients }}</td></tr>
+        <tr><td>الشبكة الافتراضية</td><td><code>{{ cfg.tunnel.virtual_subnet }}</code></td></tr>
+        <tr><td>خوادم DNS</td><td>{{ cfg.tunnel.dns_servers | join(", ") }}</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>إعدادات الويب</h2>
+      <table class="kv-table">
+        <tr><td>المضيف</td><td>{{ cfg.web.host }}:{{ cfg.web.port }}</td></tr>
+        <tr><td>قاعدة البيانات</td><td><code>{{ cfg.web.database_url }}</code></td></tr>
+        <tr><td>Debug</td><td>{{ cfg.web.debug }}</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>المراقبة (Java)</h2>
+      <table class="kv-table">
+        <tr><td>مفعّلة</td><td>{{ cfg.monitor.enabled }}</td></tr>
+        <tr><td>Socket</td><td><code>{{ cfg.monitor.stats_socket }}</code></td></tr>
+        <tr><td>فترة العيّنة</td><td>{{ cfg.monitor.sample_interval_ms }} ms</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>الحماية</h2>
+      <table class="kv-table">
+        <tr><td>fail2ban threshold</td><td>{{ cfg.security.fail2ban_threshold }} محاولات / {{ cfg.security.fail2ban_window_s }} ث</td></tr>
+        <tr><td>مدة الحظر</td><td>{{ cfg.security.fail2ban_ban_s }} ث</td></tr>
+        <tr><td>TLS مطلوب</td><td>{{ cfg.security.tls_required }}</td></tr>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,44 @@
+# VortexVPN configuration file (TOML)
+# ------------------------------------
+# Copy to /etc/vortexvpn/config.toml and edit before first run.
+# Environment variables (VORTEX_*) override these values.
+
+[tunnel]
+listen_host        = "0.0.0.0"
+listen_port        = 4433
+mtu                = 1400
+cipher             = "aes-256-gcm"
+kdf                = "hkdf-sha256"
+handshake_timeout  = 10.0
+session_ttl        = 3600
+max_clients        = 256
+worker_threads     = 4
+virtual_subnet     = "10.99.0.0/24"
+dns_servers        = ["1.1.1.1", "9.9.9.9"]
+
+[web]
+host                 = "0.0.0.0"
+port                 = 8080
+secret_key           = "CHANGE_ME_IN_PRODUCTION_long_random_string"
+database_url         = "sqlite:///vortexvpn.db"
+debug                = false
+cors_origins         = ["http://localhost:8080"]
+session_cookie_secure = false  # set true behind HTTPS
+
+[monitor]
+enabled             = true
+stats_socket        = "/var/run/vortexvpn/monitor.sock"
+sample_interval_ms  = 1000
+history_size        = 3600
+
+[security]
+fail2ban_threshold = 5
+fail2ban_window_s  = 300
+fail2ban_ban_s     = 3600
+tls_required       = false
+cert_path          = "/etc/vortexvpn/certs/server.crt"
+key_path           = "/etc/vortexvpn/certs/server.key"
+
+# Top-level
+log_level = "INFO"
+log_file  = "/var/log/vortexvpn/vortexvpn.log"

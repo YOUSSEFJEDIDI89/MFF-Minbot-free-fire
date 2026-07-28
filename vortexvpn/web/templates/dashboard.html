@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VortexVPN · لوحة التحكم</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">⚡ VortexVPN</div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+      <a href="{{ url_for('users_page') }}">المستخدمون</a>
+      <a href="{{ url_for('settings_page') }}">الإعدادات</a>
+      <span class="sep">|</span>
+      <span class="user">{{ user.username }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">خروج</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="grid-3">
+      <div class="card stat-card">
+        <div class="stat-label">الخادم</div>
+        <div class="stat-value" id="server-addr">{{ stats.listening }}</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">العملاء النشطون</div>
+        <div class="stat-value" id="active-count">{{ stats.active_clients }} / {{ stats.max_clients }}</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">الحالة</div>
+        <div class="stat-value ok">● يعمل</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>العملاء المتصلون</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>المستخدم</th>
+            <th>العنوان</th>
+            <th>IP الافتراضي</th>
+            <th>متصل منذ</th>
+            <th>آخر نشاط</th>
+            <th>↓ تنزيل</th>
+            <th>↑ رفع</th>
+            <th>تسريع</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="clients-tbody">
+          {% for c in stats.clients %}
+          <tr data-ip="{{ c.address.split(':')[0] }}" data-port="{{ c.address.split(':')[1] }}">
+            <td>{{ c.username }}</td>
+            <td>{{ c.address }}</td>
+            <td><code>{{ c.virtual_ip }}</code></td>
+            <td>{{ c.connected_at | int }}</td>
+            <td>{{ c.last_seen | int }}</td>
+            <td>{{ "%.1f"|format(c.bytes_rx / 1024) }} KB</td>
+            <td>{{ "%.1f"|format(c.bytes_tx / 1024) }} KB</td>
+            <td>{{ "✓" if c.using_accel else "—" }}</td>
+            <td><button class="btn-danger btn-sm" onclick="kickClient(this)">طرد</button></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="9" class="muted">لا يوجد عملاء متصلون</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

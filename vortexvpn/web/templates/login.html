@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VortexVPN · تسجيل الدخول</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <div class="logo">⚡ VortexVPN</div>
+    <h1>تسجيل الدخول</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="post" autocomplete="off">
+      <label>اسم المستخدم
+        <input type="text" name="username" required autofocus>
+      </label>
+      <label>كلمة المرور
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit" class="btn-primary">دخول</button>
+    </form>
+    <p class="muted">VortexVPN v1.0 · مخصص للاستخدام الشرعي للخصوصية</p>
+  </div>
+</body>
+</html>

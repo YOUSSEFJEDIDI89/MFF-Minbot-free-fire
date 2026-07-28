@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VortexVPN · المستخدمون</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">⚡ VortexVPN</div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+      <a href="{{ url_for('users_page') }}">المستخدمون</a>
+      <a href="{{ url_for('settings_page') }}">الإعدادات</a>
+      <span class="sep">|</span>
+      <span class="user">{{ user.username }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">خروج</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>إضافة مستخدم</h2>
+      <form id="add-user-form" class="inline-form">
+        <input type="text" name="username" placeholder="اسم المستخدم" required>
+        <input type="password" name="password" placeholder="كلمة المرور" required>
+        <label class="checkbox"><input type="checkbox" name="is_admin"> مشرف</label>
+        <input type="number" name="bandwidth_quota_bytes" placeholder="حجم البيانات (بايت، 0=غير محدود)" value="0">
+        <button type="submit" class="btn-primary">إضافة</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>قائمة المستخدمين</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>المستخدم</th><th>مشرف</th><th>نشط</th>
+            <th>أنشئ في</th><th>الحصة (بايت)</th><th>المستخدم (بايت)</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          {% for u in users %}
+          <tr data-username="{{ u.username }}">
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ "✓" if u.is_admin else "—" }}</td>
+            <td class="active-cell">{{ "نعم" if u.is_active else "لا" }}</td>
+            <td>{{ u.created_at | int }}</td>
+            <td>{{ u.bandwidth_quota_bytes }}</td>
+            <td>{{ u.bandwidth_used_bytes }}</td>
+            <td>
+              <button class="btn-sm btn-warning" onclick="toggleActive('{{ u.username }}', {{ (not u.is_active) | int }})">
+                {{ "تعطيل" if u.is_active else "تفعيل" }}
+              </button>
+              <button class="btn-sm btn-danger" onclick="deleteUser('{{ u.username }}')">حذف</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/users.js') }}"></script>
+</body>
+</html>
