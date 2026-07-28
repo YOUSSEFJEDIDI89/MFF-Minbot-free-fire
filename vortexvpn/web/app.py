@@ -136,6 +136,25 @@ def create_app(config: Optional[Config] = None,
     def settings_page():
         return render_template("settings.html", user=request.user, cfg=cfg)
 
+    @app.route("/connect")
+    @login_required
+    def connect_page():
+        import socket as _sock
+        s = _sock.socket(_sock.AF_INET, _sock.SOCK_DGRAM)
+        try:
+            s.connect(("8.8.8.8", 80))
+            server_ip = s.getsockname()[0]
+        except OSError:
+            server_ip = "127.0.0.1"
+        finally:
+            s.close()
+        return render_template("connect.html", user=request.user,
+                              server_ip=server_ip,
+                              tunnel_port=cfg.tunnel.listen_port,
+                              web_port=cfg.web.port,
+                              virtual_subnet=cfg.tunnel.virtual_subnet,
+                              dns_servers=cfg.tunnel.dns_servers)
+
     # ------------------------------------------------------------------ #
     # JSON API
     # ------------------------------------------------------------------ #

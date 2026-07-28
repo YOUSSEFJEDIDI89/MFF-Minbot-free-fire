@@ -116,7 +116,58 @@ So `client.tx_key == server.rx_key` and `server.tx_key == client.rx_key`.
 
 ## 🚀 Quick start
 
-### Option A — Docker (recommended for evaluation)
+### Option A — One-command setup (recommended)
+
+This is the **simplest** path. One command does everything: installs
+deps, builds the C++ accelerator, generates a strong admin password,
+writes the config, creates the admin user, and starts the server.
+
+```bash
+git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
+cd MFF-Minbot-free-fire
+./scripts/quick-start.sh
+```
+
+You'll see a clean summary like:
+
+```
+════════════════════════════════════════════════════════
+            VortexVPN is running 🚀
+════════════════════════════════════════════════════════
+
+  Web panel (open in browser):
+    http://192.168.1.50:8080
+    http://localhost:8080
+
+  Login:
+    user:     admin
+    password: rY9CZv27Mbhdr-EYONl_qw   ← generated automatically
+
+  Tunnel port (UDP):  4433
+
+  Manage:
+    stop:    ./scripts/quick-start.sh --stop
+    restart: ./scripts/quick-start.sh --restart
+    status:  ./scripts/quick-start.sh --status
+    logs:    ./scripts/quick-start.sh --logs
+```
+
+Open the URL in your browser, log in with the printed credentials, and
+click **"كيفاش تربط هاتف"** in the top bar for phone-setup steps.
+
+You can also use the `vortexvpn` CLI:
+
+```bash
+vortexvpn start         # start the server
+vortexvpn stop          # stop
+vortexvpn status        # is it running?
+vortexvpn logs          # tail logs
+vortexvpn connect       # print URL + admin + ports
+vortexvpn add-user      # create a new user (interactive)
+vortexvpn list-users    # list all users
+```
+
+### Option B — Docker (if you prefer containers)
 
 ```bash
 git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
@@ -128,9 +179,7 @@ docker compose -f docker/docker-compose.yml exec vortexvpn \
     python -m vortexvpn.bootstrap   # prints admin password
 ```
 
-Open <http://localhost:8080> and log in with `admin` + printed password.
-
-### Option B — Bare-metal install (Linux)
+### Option C — Bare-metal install (system-wide, requires root)
 
 ```bash
 git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
@@ -139,18 +188,6 @@ sudo ./scripts/install.sh
 sudo $EDITOR /etc/vortexvpn/config.toml          # set secret_key
 /opt/vortexvpn/venv/bin/python -m vortexvpn.bootstrap
 /opt/vortexvpn/scripts/manage.sh start
-```
-
-### Option C — Dev mode (no root, no TUN)
-
-```bash
-git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
-cd MFF-Minbot-free-fire
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-pip install pybind11
-( cd cpp_module && make )               # optional, builds accelerator
-./scripts/start-dev.sh                  # foreground, logs to stderr
 ```
 
 ---

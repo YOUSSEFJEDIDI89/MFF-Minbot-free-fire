@@ -79,3 +79,6 @@ Thumbs.db
 secrets/
 configs/config.toml        # real config; only commit .example
 !configs/config.toml.example
+.vortex-secrets.env        # auto-generated admin password + web secret
+vortexvpn.pid
+vortexvpn.log

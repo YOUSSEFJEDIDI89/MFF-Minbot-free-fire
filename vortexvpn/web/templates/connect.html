@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VortexVPN · كيفاش تربط هاتف</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">⚡ VortexVPN</div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">الرئيسية</a>
+      <a href="{{ url_for('users_page') }}">المستخدمون</a>
+      <a href="{{ url_for('connect_page') }}">كيفاش تربط هاتف</a>
+      <a href="{{ url_for('settings_page') }}">الإعدادات</a>
+      <span class="sep">|</span>
+      <span class="user">{{ user.username }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">خروج</a>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- Honest disclaimer FIRST -->
+    <section class="card disclaimer-card">
+      <h2>⚠️ اقرأ هذا أولاً (مهم بزاف)</h2>
+      <p>VortexVPN هو <strong>VPN عادي وشرعي</strong> يحمي خصوصيتك ويشفّر اتصالك. لكن لازم تعرف:</p>
+      <ul class="honest-list">
+        <li>✅ <strong>ما يفعله:</strong> تشفير ترافيكك، إخفاء عنوان IP الحقيقي، تجاوز قيود الشبكة، أمان على WiFi عام.</li>
+        <li>✅ <strong>ما يفعله:</strong> يسمح لك بالاتصال من هاتفك إلى السيرفر وتصفح الإنترنت كأنك على السيرفر.</li>
+        <li>❌ <strong>ما لا يفعله أبداً:</strong> لا يحسّن أداء الألعاب (VPN يضيف قفزة إضافية → غالباً يزيد الـ ping).</li>
+        <li>❌ <strong>ما لا يفعله أبداً:</strong> لا ينقل عبء المعالجة من هاتفك إلى هاتف آخر. هذا مستحيل تقنياً.</li>
+        <li>❌ <strong>ما لا يفعله أبداً:</strong> لا يخترق anti-cheat ولا يعطيك ميزة في الألعاب.</li>
+      </ul>
+      <p class="muted">إذا كنت تبحث عن أداة للغش في الألعاب، VortexVPN ليس لها. هذا اختيار مقصود.</p>
+    </section>
+
+    <!-- Server info -->
+    <section class="card">
+      <h2>معلومات السيرفر الخاص بك</h2>
+      <table class="kv-table">
+        <tr><td>عنوان السيرفر</td><td><code>{{ server_ip }}</code></td></tr>
+        <tr><td>منفذ النفق (UDP)</td><td><code>{{ tunnel_port }}</code></td></tr>
+        <tr><td>منفذ الويب</td><td><code>{{ web_port }}</code></td></tr>
+        <tr><td>الشبكة الافتراضية</td><td><code>{{ virtual_subnet }}</code></td></tr>
+        <tr><td>خوادم DNS</td><td>{{ dns_servers | join(", ") }}</td></tr>
+      </table>
+    </section>
+
+    <!-- Step 1: Client choice -->
+    <section class="card">
+      <h2>الخطوة 1: اختر تطبيق VPN على الهاتف</h2>
+      <p>VortexVPN يستعمل بروتوكول مخصص (UDP + AES-256-GCM). حالياً، الطريقة الأسهل للهاتف هي:</p>
+      <table class="client-table">
+        <thead>
+          <tr><th>التطبيق</th><th>المنصّة</th><th>ملاحظة</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>OpenVPN Connect</strong></td>
+            <td>Android / iOS</td>
+            <td>متوفر في Play Store و App Store مجاناً. (يتطلب إعداد ملف .ovpn — لم يُولّد بعد)</td>
+          </tr>
+          <tr>
+            <td><strong>WireGuard</strong></td>
+            <td>Android / iOS</td>
+            <td>أسرع وأبسط. (يتطلب دعم بروتوكول WireGuard — في قائمة المهام)</td>
+          </tr>
+          <tr>
+            <td><strong>عميل Python</strong></td>
+            <td>Linux / Termux</td>
+            <td><code>python -m vortexvpn.core.tunnel_client --host SERVER_IP --port 4433 --user YOUR_USER --password YOUR_PW</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted">⚠️ حالياً، العميل الأكثر اختباراً هو عميل Python. تطبيقات OpenVPN/WireGuard تحتاج توليد ملف تعريف — هذه ميزة قادمة.</p>
+    </section>
+
+    <!-- Step 2: Connect -->
+    <section class="card">
+      <h2>الخطوة 2: الاتصال (الطريقة الأسهل حالياً)</h2>
+      <ol class="step-list">
+        <li>
+          <strong>على الهاتف الآخر، ثبّت Termux</strong> (من F-Droid، النسخة في Play Store قديمة):<br>
+          <code>https://f-droid.org/packages/com.termux/</code>
+        </li>
+        <li>
+          <strong>في Termux، ثبّت Python:</strong>
+          <pre>pkg install python python-dev git</pre>
+        </li>
+        <li>
+          <strong>انسخ المشروع:</strong>
+          <pre>git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
+cd MFF-Minbot-free-fire
+pip install -r requirements.txt</pre>
+        </li>
+        <li>
+          <strong>أنشئ مستخدم على السيرفر</strong> (من لوحة الويب في المتصفح → المستخدمون → إضافة)، ثم على الهاتف:
+          <pre>python -m vortexvpn.core.tunnel_client \
+  --host {{ server_ip }} \
+  --port {{ tunnel_port }} \
+  --user USERNAME \
+  --password PASSWORD</pre>
+        </li>
+        <li>
+          <strong>عندما ترى "handshake completed"</strong> — الهاتف متصل بالـ VPN.
+        </li>
+      </ol>
+    </section>
+
+    <!-- What happens after -->
+    <section class="card">
+      <h2>ماذا يحدث بعد الاتصال؟</h2>
+      <p>بمجرد اتصال الهاتف بـ VortexVPN:</p>
+      <ul class="honest-list">
+        <li>🌐 كل ترافيك الإنترنت من الهاتف يمر عبر السيرفر (مشفّر).</li>
+        <li>🔒 عنوان IP الظاهر للهاتف يصبح عنوان السيرفر.</li>
+        <li>📡 يمكنك تصفح الإنترنت، استخدام التطبيقات، إلخ — كلها عبر السيرفر.</li>
+        <li>🎮 الألعاب: ستعمل، لكن <strong>الـ ping سيرتفع غالباً</strong> بسبب القفزة الإضافية. هذا طبيعي لأي VPN.</li>
+      </ul>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section class="card">
+      <h2>مشاكل شائعة وحلولها</h2>
+      <table class="kv-table">
+        <tr>
+          <td>الهاتف لا يصل</td>
+          <td>تأكد أن منفذ UDP {{ tunnel_port }} مفتوح في جدار الحماية على السيرفر (<code>sudo ufw allow {{ tunnel_port }}/udp</code>)</td>
+        </tr>
+        <tr>
+          <td>الـ ping عالي في الألعاب</td>
+          <td>هذا متوقع. VPN يضيف قفزة. للحصول على أقل ping، اختر سيرفر قريب جغرافياً.</td>
+        </tr>
+        <tr>
+          <td>انقطاع الاتصال كل دقيقة</td>
+          <td>تحقق من NAT/router على السيرفر. حافظ على جلسة نشطة بإرسال ping دوري.</td>
+        </tr>
+        <tr>
+          <td>Termux لا يبني TUN</td>
+          <td>على Android بدون root، TUN غير متاح. استعمل وضع socket-only (افتراضي في عميل Python).</td>
+        </tr>
+      </table>
+    </section>
+
+  </main>
+</body>
+</html>
