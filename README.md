@@ -119,8 +119,8 @@ So `client.tx_key == server.rx_key` and `server.tx_key == client.rx_key`.
 ### Option A — Docker (recommended for evaluation)
 
 ```bash
-git clone <your-fork-url>/vortexvpn.git
-cd vortexvpn
+git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
+cd MFF-Minbot-free-fire
 cp configs/config.toml.example configs/config.toml
 # edit configs/config.toml: set a long random web.secret_key
 docker compose -f docker/docker-compose.yml up -d --build
@@ -133,8 +133,8 @@ Open <http://localhost:8080> and log in with `admin` + printed password.
 ### Option B — Bare-metal install (Linux)
 
 ```bash
-git clone <your-fork-url>/vortexvpn.git
-cd vortexvpn
+git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
+cd MFF-Minbot-free-fire
 sudo ./scripts/install.sh
 sudo $EDITOR /etc/vortexvpn/config.toml          # set secret_key
 /opt/vortexvpn/venv/bin/python -m vortexvpn.bootstrap
@@ -144,8 +144,8 @@ sudo $EDITOR /etc/vortexvpn/config.toml          # set secret_key
 ### Option C — Dev mode (no root, no TUN)
 
 ```bash
-git clone <your-fork-url>/vortexvpn.git
-cd vortexvpn
+git clone https://github.com/YOUSSEFJEDIDI89/MFF-Minbot-free-fire.git
+cd MFF-Minbot-free-fire
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 pip install pybind11
