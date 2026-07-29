@@ -82,3 +82,9 @@ configs/config.toml        # real config; only commit .example
 .vortex-secrets.env        # auto-generated admin password + web secret
 vortexvpn.pid
 vortexvpn.log
+
+# TypeScript frontend
+frontend/node_modules/
+frontend/package-lock.json
+vortexvpn/web/static/js/bundle.js
+vortexvpn/web/static/js/bundle.js.map

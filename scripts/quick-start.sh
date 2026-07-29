@@ -41,17 +41,33 @@ SECRET_FILE="$PROJECT_DIR/.vortex-secrets.env"
 ACTION="${1:-start}"
 # Allow --password=foo or VORTEX_ADMIN_PASS env var to set a custom password
 CUSTOM_PASS=""
+PUBLIC_URL=""
+ADMIN_PATH=""
 for arg in "$@"; do
   case "$arg" in
     --password=*) CUSTOM_PASS="${arg#*=}"; ACTION="start" ;;
+    --public-url=*) PUBLIC_URL="${arg#*=}"; ACTION="start" ;;
+    --admin-path=*) ADMIN_PATH="${arg#*=}"; ACTION="start" ;;
   esac
 done
 if [ -n "$VORTEX_ADMIN_PASS" ] && [ -z "$CUSTOM_PASS" ]; then
   CUSTOM_PASS="$VORTEX_ADMIN_PASS"
 fi
-# Export so bootstrap.py can pick it up
+if [ -n "$VORTEX_PUBLIC_URL" ] && [ -z "$PUBLIC_URL" ]; then
+  PUBLIC_URL="$VORTEX_PUBLIC_URL"
+fi
+if [ -n "$VORTEX_ADMIN_PATH" ] && [ -z "$ADMIN_PATH" ]; then
+  ADMIN_PATH="$VORTEX_ADMIN_PATH"
+fi
+# Export so the Python app picks them up
 if [ -n "$CUSTOM_PASS" ]; then
   export VORTEX_ADMIN_PASS="$CUSTOM_PASS"
+fi
+if [ -n "$PUBLIC_URL" ]; then
+  export VORTEX_PUBLIC_URL="$PUBLIC_URL"
+fi
+if [ -n "$ADMIN_PATH" ]; then
+  export VORTEX_ADMIN_PATH="$ADMIN_PATH"
 fi
 
 case "$ACTION" in

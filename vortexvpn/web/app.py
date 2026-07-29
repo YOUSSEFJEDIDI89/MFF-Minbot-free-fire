@@ -77,12 +77,12 @@ def create_app(config: Optional[Config] = None,
         def _wrapper(*args, **kwargs):
             token = session.get("token")
             if not token:
-                return redirect(url_for("login", next=request.path))
+                return redirect(url_for("user_login", next=request.path))
             try:
                 user = auth.verify_token(token)
             except AuthError:
                 session.pop("token", None)
-                return redirect(url_for("login", next=request.path))
+                return redirect(url_for("user_login", next=request.path))
             request.user = user  # type: ignore[attr-defined]
             return fn(*args, **kwargs)
         return _wrapper
@@ -97,16 +97,29 @@ def create_app(config: Optional[Config] = None,
         return login_required(_wrapper)
 
     # ------------------------------------------------------------------ #
-    # HTML routes
+    # HTML routes — user-facing (visible)
     # ------------------------------------------------------------------ #
     @app.route("/")
     @login_required
     def dashboard():
         return render_template("dashboard.html", user=request.user,  # type: ignore
-                               stats=tunnel.stats())
+                               stats=tunnel.stats(),
+                               public_url=cfg.web.public_url)
 
+    # User login — visible at /login
     @app.route("/login", methods=["GET", "POST"])
-    def login():
+    def user_login():
+        return _do_login(require_admin=False, template="login.html",
+                         next_default=url_for("dashboard"))
+
+    # Hidden admin login — at admin_path (default /admin/login)
+    @app.route(cfg.web.admin_path, methods=["GET", "POST"])
+    def admin_login():
+        return _do_login(require_admin=True, template="admin_login.html",
+                         next_default=url_for("dashboard"))
+
+    def _do_login(require_admin: bool, template: str, next_default: str):
+        """Shared login handler for both user and admin logins."""
         if request.method == "POST":
             username = request.form.get("username", "")
             password = request.form.get("password", "")
@@ -114,16 +127,19 @@ def create_app(config: Optional[Config] = None,
                 user = auth.authenticate(username, password)
             except AuthError as exc:
                 flash(str(exc), "error")
-                return render_template("login.html"), 401
+                return render_template(template), 401
+            if require_admin and not user.is_admin:
+                flash("هذا الحساب ليس لديه صلاحيات إدارية", "error")
+                return render_template(template), 403
             token = auth.issue_token(user)
             session["token"] = token.to_string()
-            return redirect(request.args.get("next") or url_for("dashboard"))
-        return render_template("login.html")
+            return redirect(request.args.get("next") or next_default)
+        return render_template(template)
 
     @app.route("/logout")
     def logout():
         session.pop("token", None)
-        return redirect(url_for("login"))
+        return redirect(url_for("user_login"))
 
     @app.route("/users")
     @admin_required
@@ -139,21 +155,28 @@ def create_app(config: Optional[Config] = None,
     @app.route("/connect")
     @login_required
     def connect_page():
-        import socket as _sock
-        s = _sock.socket(_sock.AF_INET, _sock.SOCK_DGRAM)
-        try:
-            s.connect(("8.8.8.8", 80))
-            server_ip = s.getsockname()[0]
-        except OSError:
-            server_ip = "127.0.0.1"
-        finally:
-            s.close()
+        # If public_url is set, use it; otherwise detect local IP
+        if cfg.web.public_url:
+            server_ip = cfg.web.public_url
+            web_port = None  # already in the URL
+        else:
+            import socket as _sock
+            s = _sock.socket(_sock.AF_INET, _sock.SOCK_DGRAM)
+            try:
+                s.connect(("8.8.8.8", 80))
+                server_ip = s.getsockname()[0]
+            except OSError:
+                server_ip = "127.0.0.1"
+            finally:
+                s.close()
+            web_port = cfg.web.port
         return render_template("connect.html", user=request.user,
                               server_ip=server_ip,
                               tunnel_port=cfg.tunnel.listen_port,
-                              web_port=cfg.web.port,
+                              web_port=web_port,
                               virtual_subnet=cfg.tunnel.virtual_subnet,
-                              dns_servers=cfg.tunnel.dns_servers)
+                              dns_servers=cfg.tunnel.dns_servers,
+                              public_url=cfg.web.public_url)
 
     # ------------------------------------------------------------------ #
     # JSON API
@@ -217,6 +240,17 @@ def create_app(config: Optional[Config] = None,
     @app.route("/healthz")
     def healthz():
         return jsonify({"ok": True, "ts": time.time()})
+
+    @app.route("/internal/stats")
+    def internal_stats():
+        """Internal stats endpoint — localhost only, no auth.
+
+        Used by the `vortexvpn admin` shell to display live data
+        without needing a token. Restricted to 127.0.0.1.
+        """
+        if request.remote_addr not in ("127.0.0.1", "::1"):
+            abort(403)
+        return jsonify({"ok": True, "stats": tunnel.stats(), "ts": time.time()})
 
     # ------------------------------------------------------------------ #
     # Error handlers

@@ -62,6 +62,12 @@ def cmd_logs(_args) -> int:
     return run_quick_start("--logs")
 
 
+def cmd_admin(_args) -> int:
+    """Launch the interactive admin terminal."""
+    from vortexvpn.admin_shell import main as admin_main
+    return admin_main()
+
+
 def cmd_connect(_args) -> int:
     """Print connection info from the saved secrets file."""
     secrets = PROJECT_DIR / ".vortex-secrets.env"
@@ -280,6 +286,7 @@ def main() -> int:
     sub.add_parser("logs", help="tail the log file").set_defaults(func=cmd_logs)
     sub.add_parser("connect", help="print connection info (URL, admin, ports)").set_defaults(func=cmd_connect)
     sub.add_parser("show-password", help="print the current admin password (from secrets file)").set_defaults(func=cmd_show_password)
+    sub.add_parser("admin", help="launch interactive admin terminal (REPL)").set_defaults(func=cmd_admin)
 
     p_reset = sub.add_parser("reset-password", help="reset admin (or any user) password")
     p_reset.add_argument("--username", "-u", default="admin",

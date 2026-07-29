@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "AMD",
+    "moduleResolution": "node",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "outDir": "../vortexvpn/web/static/js",
+    "rootDir": "./src",
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outFile": "../vortexvpn/web/static/js/bundle.js"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

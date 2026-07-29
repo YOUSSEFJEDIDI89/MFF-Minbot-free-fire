@@ -52,10 +52,15 @@
             <td>{{ u.bandwidth_quota_bytes }}</td>
             <td>{{ u.bandwidth_used_bytes }}</td>
             <td>
-              <button class="btn-sm btn-warning" onclick="toggleActive('{{ u.username }}', {{ (not u.is_active) | int }})">
+              <button class="btn-sm btn-warning"
+                      data-toggle="{{ u.username }}"
+                      data-active="{{ u.is_active | tojson }}">
                 {{ "تعطيل" if u.is_active else "تفعيل" }}
               </button>
-              <button class="btn-sm btn-danger" onclick="deleteUser('{{ u.username }}')">حذف</button>
+              <button class="btn-sm btn-danger"
+                      data-delete="{{ u.username }}">
+                حذف
+              </button>
             </td>
           </tr>
           {% endfor %}
@@ -64,6 +69,6 @@
     </section>
   </main>
 
-  <script src="{{ url_for('static', filename='js/users.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/bundle.js') }}"></script>
 </body>
 </html>

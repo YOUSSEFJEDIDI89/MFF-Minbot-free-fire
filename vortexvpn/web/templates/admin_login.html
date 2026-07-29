@@ -3,13 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VortexVPN · تسجيل الدخول</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>·</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body class="auth-body">
-  <div class="auth-card">
-    <div class="logo">⚡ VortexVPN</div>
-    <h1>تسجيل الدخول</h1>
+  <div class="auth-card admin-auth-card">
+    <div class="logo admin-logo">⚡</div>
+    <h1>لوحة الإدارة</h1>
+    <p class="muted-small">دخول المشرفين فقط</p>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for cat, msg in messages %}
         <div class="flash flash-{{ cat }}">{{ msg }}</div>
@@ -22,9 +24,9 @@
       <label>كلمة المرور
         <input type="password" name="password" required>
       </label>
-      <button type="submit" class="btn-primary">دخول</button>
+      <button type="submit" class="btn-primary">دخول الإدارة</button>
     </form>
-    <p class="muted">VortexVPN v1.0 · مخصص للاستخدام الشرعي للخصوصية</p>
+    <p class="muted">⚠️ منطقة محظورة · جميع المحاولات مسجّلة</p>
   </div>
 </body>
 </html>

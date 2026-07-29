@@ -94,6 +94,11 @@ a:hover { color: var(--accent-2); }
 }
 .flash-error { background: rgba(248,113,113,0.1); border: 1px solid var(--danger); color: var(--danger); }
 
+/* Admin login card — distinct from user login */
+.admin-auth-card { border-color: var(--warning); box-shadow: 0 20px 60px rgba(251,191,36,0.15); }
+.admin-logo { color: var(--warning); }
+.muted-small { color: var(--muted); font-size: 11px; margin: -8px 0 16px; }
+
 /* Topbar */
 .topbar {
   display: flex;
@@ -250,3 +255,24 @@ a:hover { color: var(--accent-2); }
 @media (max-width: 720px) {
   .role-box { grid-template-columns: 1fr; }
 }
+
+/* Toast notifications (from TypeScript bundle) */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  color: #06151a;
+  font-weight: 600;
+  font-size: 13px;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s, transform 0.3s;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-success { background: var(--ok); }
+.toast-error { background: var(--danger); color: #fff; }
+.toast-info { background: var(--accent); }

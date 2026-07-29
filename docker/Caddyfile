@@ -1,0 +1,77 @@
+# Caddyfile for VortexVPN — automatic HTTPS with Let's Encrypt.
+#
+# Replace server.vortevpn.org with your real domain. Point its DNS A/AAAA
+# record to this server's IP, then:
+#
+#   1. Install Caddy:        sudo apt install caddy
+#   2. Copy this file:       sudo cp Caddyfile /etc/caddy/Caddyfile
+#   3. Reload:               sudo systemctl reload caddy
+#
+# Caddy will:
+#   - Obtain a Let's Encrypt cert automatically
+#   - Redirect HTTP → HTTPS
+#   - Proxy all requests to the local VortexVPN web panel
+#   - Proxy WebSocket (future) and the UDP tunnel through 443/QUIC
+#
+# After this is set up, set in your config.toml:
+#   [web]
+#   public_url = "https://server.vortevpn.org"
+#   session_cookie_secure = true
+
+{
+	# Global options
+	email admin@vortevpn.org  # ← change to your email for Let's Encrypt
+	# Uncomment for staging (testing without hitting rate limits):
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Main HTTPS site
+# ─────────────────────────────────────────────────────────────────────────────
+server.vortevpn.org {                       # ← your domain here
+	encode gzip zstd
+
+	# Security headers
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		# Disallow indexing of the admin area
+		/X- "noindex, nofollow"
+	}
+
+	# Reverse proxy to the Flask app (port 8080)
+	reverse_proxy 127.0.0.1:8080 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up Host {host}
+	}
+
+	# Access log
+	log {
+		output file /var/log/caddy/vortexvpn.log {
+			roll_size 10MB
+			roll_keep 5
+		}
+		format json
+	}
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Optional: redirect www → apex (or vice versa)
+# ─────────────────────────────────────────────────────────────────────────────
+# www.vortevpn.org {
+# 	redir https://server.vortevpn.org{uri} permanent
+# }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Notes on the UDP tunnel
+# ─────────────────────────────────────────────────────────────────────────────
+# Caddy does NOT proxy UDP. The VortexVPN tunnel (UDP 4433) must be
+# reachable directly. Make sure your firewall allows it:
+#
+#   sudo ufw allow 4433/udp
+#
+# For NAT'd servers, port-forward UDP 4433 to the VortexVPN host.

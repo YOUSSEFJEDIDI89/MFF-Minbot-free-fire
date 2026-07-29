@@ -53,6 +53,13 @@ class WebConfig:
     debug: bool = False
     cors_origins: list = field(default_factory=lambda: ["http://localhost:8080"])
     session_cookie_secure: bool = True
+    # Public URL (set when running behind a reverse proxy with HTTPS).
+    # Shown on the /connect page and used in QR codes.
+    public_url: str = ""
+    # Hidden admin login path. Default is "/admin/login" but you should
+    # change it to something unpredictable like "/x7k2m-admin" for
+    # extra security-through-obscurity on top of auth.
+    admin_path: str = "/admin/login"
 
 
 @dataclass
@@ -106,6 +113,10 @@ def _apply_env_overrides(cfg: Config) -> Config:
         cfg.tunnel.cipher = val
     if val := os.environ.get("VORTEX_MAX_CLIENTS"):
         cfg.tunnel.max_clients = int(val)
+    if val := os.environ.get("VORTEX_PUBLIC_URL"):
+        cfg.web.public_url = val
+    if val := os.environ.get("VORTEX_ADMIN_PATH"):
+        cfg.web.admin_path = val
     return cfg
 
 

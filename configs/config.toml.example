@@ -24,6 +24,14 @@ database_url         = "sqlite:///vortexvpn.db"
 debug                = false
 cors_origins         = ["http://localhost:8080"]
 session_cookie_secure = false  # set true behind HTTPS
+# Public URL (set when running behind Caddy/nginx with HTTPS).
+# Example: "https://server.vortevpn.org"
+# When set, the /connect page shows this URL instead of the local IP.
+public_url           = ""
+# Hidden admin login path. Default "/admin/login" works, but for extra
+# security-through-obscurity, change to something unpredictable like
+# "/x7k2m-admin-panel". Only you (the admin) will know the URL.
+admin_path           = "/admin/login"
 
 [monitor]
 enabled             = true

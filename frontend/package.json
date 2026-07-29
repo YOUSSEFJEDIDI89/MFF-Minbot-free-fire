@@ -1,0 +1,13 @@
+{
+  "name": "vortexvpn-frontend",
+  "version": "1.0.0",
+  "description": "TypeScript frontend for VortexVPN web panel",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf ../vortexvpn/web/static/js/bundle.js ../vortexvpn/web/static/js/bundle.js.map"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
