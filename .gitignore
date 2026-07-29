@@ -86,5 +86,7 @@ vortexvpn.log
 # TypeScript frontend
 frontend/node_modules/
 frontend/package-lock.json
-vortexvpn/web/static/js/bundle.js
-vortexvpn/web/static/js/bundle.js.map
+# NOTE: bundle.js IS committed so Termux/Android users (who don't have
+# npm) can use the TypeScript-built UI directly. To rebuild after
+# editing frontend/src/main.ts:
+#   cd frontend && npm install && npm run build

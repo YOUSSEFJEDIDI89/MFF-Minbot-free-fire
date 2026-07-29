@@ -169,6 +169,21 @@ fi
 }
 ok "dependencies ready ($([ "$IS_TERMUX" = "1" ] && echo termux || echo standard))"
 
+# Install the vortexvpn CLI (without forcing cryptography on Termux)
+step "2b/7" "installing vortexvpn CLI..."
+if [ "$IS_TERMUX" = "1" ]; then
+  # On Termux: install with [termux] extra (pycryptodome), NOT [crypto]
+  "$PYTHON" -m pip install --quiet -e "$PROJECT_DIR[termux]" 2>&1 | tail -1 || {
+    warn "could not install vortexvpn CLI as editable — using scripts/ directly"
+  }
+else
+  # On Linux: install with [crypto] + [argon2] extras
+  "$PYTHON" -m pip install --quiet -e "$PROJECT_DIR[crypto,argon2]" 2>&1 | tail -1 || {
+    warn "could not install vortexvpn CLI as editable — using scripts/ directly"
+  }
+fi
+ok "vortexvpn CLI ready (try: vortexvpn guide)"
+
 # --------------------------------------------------------------------------- #
 # Step 3: C++ accelerator (optional — skipped on Termux)
 # --------------------------------------------------------------------------- #
