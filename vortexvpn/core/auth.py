@@ -185,6 +185,19 @@ class AuthManager:
             cur = conn.execute("DELETE FROM users WHERE username = ?", (username,))
             return cur.rowcount > 0
 
+    def reset_password(self, username: str, new_password: str) -> bool:
+        """Reset a user's password. Returns False if user doesn't exist."""
+        if len(new_password) < 8:
+            raise AuthError("password must be at least 8 characters")
+        salt = secrets.token_bytes(16)
+        pw_hash = self._hash_password(new_password, salt)
+        with self._connect() as conn:
+            cur = conn.execute(
+                "UPDATE users SET password_hash = ?, salt = ? WHERE username = ?",
+                (pw_hash, salt, username),
+            )
+            return cur.rowcount > 0
+
     def set_active(self, username: str, is_active: bool) -> bool:
         with self._connect() as conn:
             cur = conn.execute(

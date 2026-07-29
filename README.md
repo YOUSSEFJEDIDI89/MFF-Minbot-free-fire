@@ -163,8 +163,30 @@ vortexvpn stop          # stop
 vortexvpn status        # is it running?
 vortexvpn logs          # tail logs
 vortexvpn connect       # print URL + admin + ports
+vortexvpn show-password # print the current admin password
+vortexvpn reset-password --new=MyPassword123   # change admin password
 vortexvpn add-user      # create a new user (interactive)
 vortexvpn list-users    # list all users
+```
+
+### Want your own password from the start?
+
+Skip the random password and set your own:
+
+```bash
+# Option 1: command-line flag
+./scripts/quick-start.sh --password=MyOwnPassword123
+
+# Option 2: environment variable
+VORTEX_ADMIN_PASS=MyOwnPassword123 ./scripts/quick-start.sh
+```
+
+### Forgot your password?
+
+```bash
+vortexvpn show-password                                  # see current admin password
+vortexvpn reset-password --new=MyNewStrongPass456        # change it (non-interactive)
+vortexvpn restart                                        # apply changes
 ```
 
 ### Option B — Docker (if you prefer containers)

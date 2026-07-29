@@ -120,6 +120,107 @@ def cmd_connect(_args) -> int:
     return 0
 
 
+def cmd_show_password(_args) -> int:
+    """Print the admin password from the secrets file."""
+    secrets = PROJECT_DIR / ".vortex-secrets.env"
+    if not secrets.exists():
+        print("no secrets file found")
+        print("run:  vortexvpn start")
+        print("  or: ./scripts/quick-start.sh")
+        return 1
+    admin_user = admin_pass = ""
+    for line in secrets.read_text().splitlines():
+        if line.startswith("VORTEX_ADMIN_USER="):
+            admin_user = line.split("=", 1)[1]
+        elif line.startswith("VORTEX_ADMIN_PASS="):
+            admin_pass = line.split("=", 1)[1]
+    if not admin_pass:
+        print("no admin password recorded in secrets file")
+        print("(it may have been reset via 'vortexvpn reset-password')")
+        return 1
+    print()
+    print("─" * 40)
+    print(f"  admin username: {admin_user}")
+    print(f"  admin password: {admin_pass}")
+    print("─" * 40)
+    print()
+    print("Note: if you changed this password via 'reset-password',")
+    print("the value above is the ORIGINAL one and may be outdated.")
+    print("Use 'vortexvpn connect' to see the URL + current admin info.")
+    return 0
+
+
+def cmd_reset_password(args) -> int:
+    """Reset a user's password (default: admin).
+
+    Updates both the auth DB and the .vortex-secrets.env file (so the
+    new password is reflected in 'show-password' / 'connect' output).
+    """
+    import getpass
+    import secrets as _secrets
+
+    sys.path.insert(0, str(PROJECT_DIR))
+    from vortexvpn.core.auth import AuthManager, AuthError
+    from vortexvpn.core.config import load_config
+
+    cfg = load_config()
+    auth = AuthManager(hmac_secret=cfg.web.secret_key.encode("utf-8"))
+
+    username = args.username
+    new_pass = args.new
+
+    # Confirm the user exists
+    if not auth.get_user(username):
+        print(f"error: user '{username}' does not exist", file=sys.stderr)
+        print("existing users:")
+        for u in auth.list_users():
+            print(f"  - {u.username}")
+        return 1
+
+    # Prompt for new password if not given on CLI
+    if not new_pass:
+        print(f"Resetting password for user '{username}'")
+        print("(password must be at least 8 characters)")
+        new_pass = getpass.getpass("new password: ")
+        confirm = getpass.getpass("confirm:      ")
+        if new_pass != confirm:
+            print("error: passwords do not match", file=sys.stderr)
+            return 1
+        if len(new_pass) < 8:
+            print("error: password must be at least 8 characters", file=sys.stderr)
+            return 1
+
+    try:
+        ok = auth.reset_password(username, new_pass)
+    except AuthError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    if not ok:
+        print(f"error: user '{username}' not found in DB", file=sys.stderr)
+        return 1
+
+    # If we reset admin, also update .vortex-secrets.env so
+    # 'show-password' and 'connect' reflect the new value.
+    secrets_file = PROJECT_DIR / ".vortex-secrets.env"
+    if username == "admin" and secrets_file.exists():
+        lines = secrets_file.read_text().splitlines()
+        out = []
+        for line in lines:
+            if line.startswith("VORTEX_ADMIN_PASS="):
+                out.append(f"VORTEX_ADMIN_PASS={new_pass}")
+            else:
+                out.append(line)
+        secrets_file.write_text("\n".join(out) + "\n")
+        secrets_file.chmod(0o600)
+
+    print(f"[+] password updated for '{username}'")
+    if username == "admin":
+        print("[+] .vortex-secrets.env also updated")
+    print("[+] if the server is running, restart it to pick up changes:")
+    print("      vortexvpn restart")
+    return 0
+
+
 def cmd_add_user(args) -> int:
     """Create a new user."""
     sys.path.insert(0, str(PROJECT_DIR))
@@ -178,6 +279,14 @@ def main() -> int:
     sub.add_parser("status", help="show running state").set_defaults(func=cmd_status)
     sub.add_parser("logs", help="tail the log file").set_defaults(func=cmd_logs)
     sub.add_parser("connect", help="print connection info (URL, admin, ports)").set_defaults(func=cmd_connect)
+    sub.add_parser("show-password", help="print the current admin password (from secrets file)").set_defaults(func=cmd_show_password)
+
+    p_reset = sub.add_parser("reset-password", help="reset admin (or any user) password")
+    p_reset.add_argument("--username", "-u", default="admin",
+                         help="username (default: admin)")
+    p_reset.add_argument("--new", "-n",
+                         help="new password (prompted if omitted)")
+    p_reset.set_defaults(func=cmd_reset_password)
 
     p_user = sub.add_parser("add-user", help="create a new user")
     p_user.add_argument("--username", "-u", help="username (prompted if omitted)")

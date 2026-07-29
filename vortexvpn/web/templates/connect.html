@@ -130,6 +130,34 @@ cd MFF-Minbot-free-fire
 
     <!-- Troubleshooting -->
     <section class="card">
+      <h2>🔑 نسيت كلمة سر admin؟</h2>
+      <p>إذا نسيت كلمة سر المسؤول (admin)، عندك 3 طرق لاسترجاعها أو تغييرها:</p>
+
+      <h3>الطريقة 1: اعرض كلمة السر الحالية</h3>
+      <pre>vortexvpn show-password</pre>
+      <p class="muted">↳ يطبع كلمة السر المسجّلة في ملف .vortex-secrets.env</p>
+
+      <h3>الطريقة 2: غيّر كلمة السر (تفاعلي)</h3>
+      <pre>vortexvpn reset-password
+# أو مع تحديد مستخدم معين:
+vortexvpn reset-password --username admin</pre>
+      <p class="muted">↳ سيطلب منك كلمة سر جديدة مرتين للتأكيد</p>
+
+      <h3>الطريقة 3: غيّر كلمة السر بأمر واحد (non-interactive)</h3>
+      <pre>vortexvpn reset-password --new=MyNewStrongPassword123</pre>
+      <p class="muted">↳ مفيد في السكريبتات</p>
+
+      <h3>الطريقة 4: حدد كلمة سر خاصة عند التثبيت الأول</h3>
+      <pre>./scripts/quick-start.sh --password=MyOwnPassword123
+# أو عبر env var:
+VORTEX_ADMIN_PASS=MyOwnPassword123 ./scripts/quick-start.sh</pre>
+      <p class="muted">↳ تتجنب كلمة السر العشوائية وتضع كلمتك من البداية</p>
+
+      <p class="muted">⚠️ بعد تغيير كلمة السر، أعد تشغيل السيرفر: <code>vortexvpn restart</code></p>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section class="card">
       <h2>مشاكل شائعة وحلولها</h2>
       <table class="kv-table">
         <tr>

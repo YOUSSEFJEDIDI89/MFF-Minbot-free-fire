@@ -85,3 +85,29 @@ def test_fail2ban_after_threshold(auth: AuthManager) -> None:
     with pytest.raises(AuthError) as exc_info:
         auth.authenticate("ivan", "password-123")
     assert "banned" in str(exc_info.value).lower() or "invalid" in str(exc_info.value).lower()
+
+
+def test_reset_password(auth: AuthManager) -> None:
+    auth.create_user("wendy", "old-password-123")
+    # Verify old password works
+    user = auth.authenticate("wendy", "old-password-123")
+    assert user.username == "wendy"
+    # Reset
+    assert auth.reset_password("wendy", "new-password-456")
+    # Old password must fail
+    with pytest.raises(AuthError):
+        auth.authenticate("wendy", "old-password-123")
+    # New password must work
+    user = auth.authenticate("wendy", "new-password-456")
+    assert user.username == "wendy"
+
+
+def test_reset_password_too_short(auth: AuthManager) -> None:
+    auth.create_user("xander", "password-123")
+    with pytest.raises(AuthError):
+        auth.reset_password("xander", "short")
+
+
+def test_reset_password_nonexistent_user(auth: AuthManager) -> None:
+    # Non-existent user should return False, not raise
+    assert auth.reset_password("ghost", "password-123") is False
